@@ -6,22 +6,50 @@
                  :is-full-page="fullPage"></loading>
 
         <h1>Employes</h1>
-        <template v-if="departments != null">
-            <div>
-                <label class="typo__label">Select department</label>
-                <multiselect
-                    v-model="selected_department"
-                    track-by="id"
-                    label="title"
-                    placeholder="Select department"
-                    :options="departments"
-                    :searchable="false"
-                    :allow-empty="false"
-                    @select="selectDepartment">
-                </multiselect>
+
+        <div class="container">
+            <p>Select XML file</p>
+            <div class="row">
+                <div class="col-11">
+                    <div class="custom-file">
+                        <input @change="uploadFile($event)" type="file" class="custom-file-input" id="inputGroupFile01">
+                        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" :class="{ disabled : file == null }" :disabled="file == null" @click="importData" class="btn btn-primary">Import</button>
+                </div>
             </div>
-            <br>
-        </template>
+        </div>
+        <br>
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <label class="typo__label">Select department</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-11">
+                    <template v-if="departments != null">
+                        <multiselect
+                            v-model="selected_department"
+                            track-by="id"
+                            label="title"
+                            placeholder="Select department"
+                            :options="departments"
+                            :searchable="false"
+                            :allow-empty="false"
+                            @select="selectDepartment">
+                        </multiselect>
+                    </template>
+                </div>
+                <div class="col-1">
+                    <button type="button" @click="exportData" class="btn btn-success">Export</button>
+                </div>
+            </div>
+        </div>
+        <br>
         <template v-if="employees != null">
             <table class="table table-dark">
                 <thead>
@@ -97,6 +125,7 @@
                 },
                 query_url: null,
                 limits: [10, 25, 50, 100],
+                file: null,
             };
         },
         created() {
@@ -143,11 +172,12 @@
                 if (this.$route.name === 'employes-department') {
                     department = this.$route.params.slug;
                 }
-                this.selected_department = this.departments.filter(obj => {
+                const dep = this.departments.filter(obj => {
                     return obj.slug === department;
                 });
+                this.selected_department = dep[0];
                 if (department !== 'all') {
-                    this.$set(this.query, 'department', this.selected_department[0].id);
+                    this.$set(this.query, 'department', this.selected_department.id);
                 }
             },
             setQueryFromUlr() {
@@ -169,6 +199,28 @@
                 this.setDepartment('all');
                 this.getEmployees();
             },
+
+            exportData() {
+                this.isLoading = true;
+                this.axios.get('/api/export',  { params: { department: this.selected_department.id } }).then((response) => {
+                    this.isLoading = false;
+                    window.open('/xml.xml', '_blank');
+                });
+            },
+            importData() {
+                if (this.file != null) {
+                    this.isLoading = true;
+                    const formData = new FormData();
+                    formData.append('file', this.file);
+                    this.axios.post('/api/import',  formData, {headers: {'Content-Type': 'multipart/form-data'}}).then((response) => {
+                        this.getDepartments();
+                    });
+                }
+            },
+
+            uploadFile(event){
+                this.file = event.target.files[0];
+            }
 
         },
     };

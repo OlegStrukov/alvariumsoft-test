@@ -88,6 +88,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'employes',
   data: function data() {
@@ -110,7 +138,8 @@ __webpack_require__.r(__webpack_exports__);
         limit: 10
       },
       query_url: null,
-      limits: [10, 25, 50, 100]
+      limits: [10, 25, 50, 100],
+      file: null
     };
   },
   created: function created() {
@@ -169,12 +198,13 @@ __webpack_require__.r(__webpack_exports__);
         department = this.$route.params.slug;
       }
 
-      this.selected_department = this.departments.filter(function (obj) {
+      var dep = this.departments.filter(function (obj) {
         return obj.slug === department;
       });
+      this.selected_department = dep[0];
 
       if (department !== 'all') {
-        this.$set(this.query, 'department', this.selected_department[0].id);
+        this.$set(this.query, 'department', this.selected_department.id);
       }
     },
     setQueryFromUlr: function setQueryFromUlr() {
@@ -197,6 +227,38 @@ __webpack_require__.r(__webpack_exports__);
       });
       this.setDepartment('all');
       this.getEmployees();
+    },
+    exportData: function exportData() {
+      var _this3 = this;
+
+      this.isLoading = true;
+      this.axios.get('/api/export', {
+        params: {
+          department: this.selected_department.id
+        }
+      }).then(function (response) {
+        _this3.isLoading = false;
+        window.open('/xml.xml', '_blank');
+      });
+    },
+    importData: function importData() {
+      var _this4 = this;
+
+      if (this.file != null) {
+        this.isLoading = true;
+        var formData = new FormData();
+        formData.append('file', this.file);
+        this.axios.post('/api/import', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then(function (response) {
+          _this4.getDepartments();
+        });
+      }
+    },
+    uploadFile: function uploadFile(event) {
+      this.file = event.target.files[0];
     }
   }
 });
@@ -236,45 +298,104 @@ var render = function() {
       _vm._v(" "),
       _c("h1", [_vm._v("Employes")]),
       _vm._v(" "),
-      _vm.departments != null
-        ? [
-            _c(
-              "div",
-              [
-                _c("label", { staticClass: "typo__label" }, [
-                  _vm._v("Select department")
-                ]),
-                _vm._v(" "),
-                _c("multiselect", {
-                  attrs: {
-                    "track-by": "id",
-                    label: "title",
-                    placeholder: "Select department",
-                    options: _vm.departments,
-                    searchable: false,
-                    "allow-empty": false
-                  },
-                  on: { select: _vm.selectDepartment },
-                  model: {
-                    value: _vm.selected_department,
-                    callback: function($$v) {
-                      _vm.selected_department = $$v
-                    },
-                    expression: "selected_department"
+      _c("div", { staticClass: "container" }, [
+        _c("p", [_vm._v("Select XML file")]),
+        _vm._v(" "),
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-11" }, [
+            _c("div", { staticClass: "custom-file" }, [
+              _c("input", {
+                staticClass: "custom-file-input",
+                attrs: { type: "file", id: "inputGroupFile01" },
+                on: {
+                  change: function($event) {
+                    return _vm.uploadFile($event)
                   }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("br")
-          ]
-        : _vm._e(),
+                }
+              }),
+              _vm._v(" "),
+              _c(
+                "label",
+                {
+                  staticClass: "custom-file-label",
+                  attrs: { for: "inputGroupFile01" }
+                },
+                [_vm._v("Choose file")]
+              )
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-1" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                class: { disabled: _vm.file == null },
+                attrs: { type: "button", disabled: _vm.file == null },
+                on: { click: _vm.importData }
+              },
+              [_vm._v("Import")]
+            )
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("br"),
+      _vm._v(" "),
+      _c("div", { staticClass: "container" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c("div", { staticClass: "row" }, [
+          _c(
+            "div",
+            { staticClass: "col-11" },
+            [
+              _vm.departments != null
+                ? [
+                    _c("multiselect", {
+                      attrs: {
+                        "track-by": "id",
+                        label: "title",
+                        placeholder: "Select department",
+                        options: _vm.departments,
+                        searchable: false,
+                        "allow-empty": false
+                      },
+                      on: { select: _vm.selectDepartment },
+                      model: {
+                        value: _vm.selected_department,
+                        callback: function($$v) {
+                          _vm.selected_department = $$v
+                        },
+                        expression: "selected_department"
+                      }
+                    })
+                  ]
+                : _vm._e()
+            ],
+            2
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-1" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-success",
+                attrs: { type: "button" },
+                on: { click: _vm.exportData }
+              },
+              [_vm._v("Export")]
+            )
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("br"),
       _vm._v(" "),
       _vm.employees != null
         ? [
             _c("table", { staticClass: "table table-dark" }, [
-              _vm._m(0),
+              _vm._m(1),
               _vm._v(" "),
               _c(
                 "tbody",
@@ -354,6 +475,18 @@ var render = function() {
   )
 }
 var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col" }, [
+        _c("label", { staticClass: "typo__label" }, [
+          _vm._v("Select department")
+        ])
+      ])
+    ])
+  },
   function() {
     var _vm = this
     var _h = _vm.$createElement

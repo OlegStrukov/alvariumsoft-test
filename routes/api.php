@@ -23,7 +23,7 @@ Route::group(['middleware' => 'api'], function () {
     Route::get('/get-employees', 'api\EmployeeController@index');
     Route::get('/get-departments', 'api\DepartmentController@index');
 
-
     Route::get('/export', 'api\ImportExportController@export');
+    Route::post('/import', 'api\ImportExportController@import');
 
 });
