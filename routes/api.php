@@ -23,12 +23,7 @@ Route::group(['middleware' => 'api'], function () {
     Route::get('/get-employees', 'api\EmployeeController@index');
     Route::get('/get-departments', 'api\DepartmentController@index');
 
-    //Route::post('/users-frontend/{user}/update', 'frontend\UserController@update');
 
-    //favorites
-//    Route::get('/fovorites-frontend/list', 'frontend\FavoriteController@index');
-//    Route::post('/fovorites-frontend/create', 'frontend\FavoriteController@create');
-//    Route::get('/fovorites-frontend/check-favorites', 'frontend\FavoriteController@checkFavorites');
-
+    Route::get('/export', 'api\ImportExportController@export');
 
 });
